@@ -20,6 +20,7 @@ use Mekras\OData\Client\Document\EntryDocument;
 use Mekras\OData\Client\Document\ErrorDocument;
 use Mekras\OData\Client\Element\Entry;
 use Mekras\OData\Client\Element\Properties;
+use Mekras\OData\Client\Element\InlineFeedLink;
 
 /**
  * OData extensions.
@@ -107,6 +108,13 @@ class ODataExtension implements DocumentExtension, ElementExtension, NamespaceEx
                     // Node name already checked
                     return new Properties($parent, $element);
             }
+        } elseif (OData::META === $element->namespaceURI) {
+            switch ($element->localName) {
+                case 'link':
+                    /** @var Content $parent */
+                    // Node name already checked
+                    return new InlineFeedLink($parent, $element);
+            }
         }
 
         return null;
@@ -132,6 +140,8 @@ class ODataExtension implements DocumentExtension, ElementExtension, NamespaceEx
             case 'm:properties':
                 /** @var Content $parent */
                 return new Properties($parent);
+            case 'link':
+                return new InlineFeedLink($parent);
         }
 
         return null;
