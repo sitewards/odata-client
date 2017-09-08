@@ -37,7 +37,7 @@ class Service
     private $serviceRootUri;
 
     /**
-     * Клиент HTTP.
+     * HTTP Client
      *
      * @var HttpClient
      */
@@ -58,6 +58,11 @@ class Service
     private $documentFactory;
 
     /**
+     * @var array<string,string>
+     */
+    private $defaultHttpHeaders;
+
+    /**
      * Creates new OData service proxy.
      *
      * @param string         $serviceRootUri OData service root URI.
@@ -71,12 +76,21 @@ class Service
     public function __construct(
         $serviceRootUri,
         HttpClient $httpClient,
-        RequestFactory $requestFactory
+        RequestFactory $requestFactory,
+        DocumentFactory $documentFactory = null,
+        $defaultHttpHeaders = []
     ) {
         $this->serviceRootUri = rtrim($serviceRootUri, '/');
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
-        $this->documentFactory = new DocumentFactory();
+
+        $this->documentFactory = $documentFactory !== null ? $documentFactory : new DocumentFactory();
+
+        $this->defaultHttpHeaders = !empty($defaultHttpHeaders) ? $defaultHttpHeaders : array(
+            'DataServiceVersion'    => '2.0',
+            'MaxDataServiceVersion' => '3.0',
+            'Accept'                => 'application/atom+xml,application/atomsvc+xml,application/xml'
+        );
     }
 
     /**
@@ -85,6 +99,7 @@ class Service
      * @param string   $method   HTTP method.
      * @param string   $uri      URI.
      * @param Document $document Document to send to the server.
+     * @param array    $additionalHeaders - additional http headers to send to the server
      *
      * @return Document
      *
@@ -97,13 +112,9 @@ class Service
      *
      * @since 0.3
      */
-    public function sendRequest($method, $uri, Document $document = null)
+    public function sendRequest($method, $uri, Document $document = null, array $additionalHeaders = array())
     {
-        $headers = [
-            'DataServiceVersion' => '2.0',
-            'MaxDataServiceVersion' => '3.0',
-            'Accept' => 'application/atom+xml,application/atomsvc+xml,application/xml'
-        ];
+        $headers = array_merge($this->defaultHttpHeaders, $additionalHeaders);
 
         if ($document) {
             $headers['Content-type'] = 'application/atom+xml';
