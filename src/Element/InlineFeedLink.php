@@ -28,7 +28,11 @@ class InlineFeedLink extends BaseLink
         return $this->getCachedProperty(
             'feed',
             function () {
-                $element = $this->query('inline/atom:feed', Node::SINGLE | Node::REQUIRED);
+                $element = $this->query('m:inline/atom:feed', Node::SINGLE);
+
+                if ($element === null) {
+                    return null;
+                }
 
                 /** @var Feed $this */
                 return $this->getExtensions()->parseElement($this, $element);
