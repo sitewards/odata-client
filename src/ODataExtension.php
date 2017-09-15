@@ -100,6 +100,9 @@ class ODataExtension implements DocumentExtension, ElementExtension, NamespaceEx
                 case 'entry':
                     // Node name already checked
                     return new Entry($parent, $element);
+                case 'link':
+                    // Node name already checked
+                    return new InlineFeedLink($parent, $element);
             }
         } elseif (OData::META === $element->namespaceURI) {
             switch ($element->localName) {
@@ -107,11 +110,7 @@ class ODataExtension implements DocumentExtension, ElementExtension, NamespaceEx
                     /** @var Content $parent */
                     // Node name already checked
                     return new Properties($parent, $element);
-            }
-        } elseif (OData::META === $element->namespaceURI) {
-            switch ($element->localName) {
                 case 'link':
-                    /** @var Content $parent */
                     // Node name already checked
                     return new InlineFeedLink($parent, $element);
             }
